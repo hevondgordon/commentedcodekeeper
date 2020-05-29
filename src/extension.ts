@@ -1,30 +1,63 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import {CommentedCodeDependenciesProvider} from './dependencyProvider';
+import {CommentedCodeDependencyProvider} from './dependencyProvider';
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
+/**
+ * @param {vscode.ExtensionContext } context
+ */
 export function activate(context: vscode.ExtensionContext) {
+  const commentedCodeDependencyProvider = new CommentedCodeDependencyProvider();
+  vscode.window.registerTreeDataProvider('commentedCodeKeeperView',
+      commentedCodeDependencyProvider);
+  vscode.commands.registerCommand(
+      'commentedCodeKeeperView.addEntry',
+      async () => {
+        const snippet = commentedCodeDependencyProvider.getSelectedSnippet();
+        const title = await commentedCodeDependencyProvider.getTitle();
+        const description = await commentedCodeDependencyProvider
+            .getDescription();
+        const date = await commentedCodeDependencyProvider.getReminderDate();
 
-	console.log('Congratulations, your extension "commentedcodekeeper" is now active!');
-	const commentedCodeDependenciesProvider = new CommentedCodeDependenciesProvider();
-	vscode.window.registerTreeDataProvider('commentedCodeKeeperView', commentedCodeDependenciesProvider);
-	vscode.commands.registerCommand(
-		'commentedCodeKeeperView.addEntry',
-		() => vscode.window.showInformationMessage(`Successfully called add entry.`));
+        console.info(`Code Snippet: ${snippet}`);
+        console.info(`Title: ${title}`);
+        console.info(`Description: ${description}`);
+        console.info(`Date: ${date}`);
 
-	vscode.window.createTreeView('commentedCodeKeeperView', {
-		treeDataProvider: commentedCodeDependenciesProvider
-	});
-	let disposable = vscode.commands.registerCommand('commentedCodeKeeperView.commentCode', () => {
+        commentedCodeDependencyProvider.createCodeSnippet(
+            title,
+            description,
+            snippet,
+            date,
+        );
+      },
+  );
 
-		vscode.window.showInformationMessage('Hello World from commentedcodekeeper!');
-		
-	});
+  vscode.commands.registerCommand(
+      'commentedCodeKeeperView.deleteEntry',
+      () => {
+        vscode.window.showInformationMessage(
+            `Successfully called deleteEntry.`);
+      },
+  );
 
-	context.subscriptions.push(disposable);
+  vscode.commands.registerCommand(
+      'commentedCodeKeeperView.editEntry',
+      () => {
+        vscode.window.showInformationMessage(`Successfully called editEntry.`);
+      },
+  );
+
+  vscode.window.createTreeView('commentedCodeKeeperView', {
+    treeDataProvider: commentedCodeDependencyProvider,
+  });
+  const disposable = vscode.commands.registerCommand(
+      'commentedCodeKeeperView.commentCode', () => {
+        vscode.window.showInformationMessage('Hello World!');
+      });
+
+  context.subscriptions.push(disposable);
 }
 
-// this method is called when your extension is deactivated
+/** this method is called when your extension is deactivated */
 export function deactivate() {}
