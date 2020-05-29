@@ -17,8 +17,8 @@
 	"contributes": {
 		"viewsWelcome": [
 			{
-			  "view": "commentedCodeKeeperView",
-			  "contents": "No code snippets found. Click the button below to get started\n[Add Commented Code Snippet](command:commentedCodeKeeperView.addEntry)"
+				"view": "commentedCodeKeeperView",
+				"contents": "No code snippets found. Click the button below to get started\n[Add Commented Code Snippet](command:commentedCodeKeeperView.addEntry)"
 			}
 		],
 		"commands": [
@@ -29,6 +29,18 @@
 			{
 				"command": "commentedCodeKeeperView.addEntry",
 				"title": "Add"
+			},
+			{
+				"command": "commentedCodeKeeperView.editEntry",
+				"title": "Edit",
+				"icon": {
+					"light": "./resources/dark/dependency.svg",
+					"dark": "./resources/light/dependency.svg"
+				}
+			},
+			{
+				"command": "commentedCodeKeeperView.deleteEntry",
+				"title": "Delete"
 			}
 		],
 		"views": {
@@ -41,18 +53,29 @@
 		},
 		"viewsContainers": {
 			"activitybar": [
-			  {
-				"id": "commentedcode-explorer",
-				"title": "Commented Code Explorer",
-				"icon": "./resources/icon/icon.svg"
-			  }
+				{
+					"id": "commentedcode-explorer",
+					"title": "Commented Code Explorer",
+					"icon": "./resources/icon/icon.svg"
+				}
 			]
-		  },
-		  "menus": {
+		},
+		"menus": {
 			"view/title": [
 				{
 					"command": "commentedCodeKeeperView.addEntry",
 					"when": "view == commentedCodeKeeperView"
+				}
+			],
+			"view/item/context": [
+				{
+					"command": "commentedCodeKeeperView.editEntry",
+					"when": "view == commentedCodeKeeperView && viewItem == dependency",
+					"group": "inline"
+				},
+				{
+					"command": "commentedCodeKeeperView.deleteEntry",
+					"when": "view == commentedCodeKeeperView && viewItem == dependency"
 				}
 			]
 		}
@@ -71,9 +94,10 @@
 		"@types/mocha": "^7.0.2",
 		"@types/node": "^13.11.0",
 		"@types/vscode": "^1.45.0",
-		"@typescript-eslint/eslint-plugin": "^2.30.0",
-		"@typescript-eslint/parser": "^2.30.0",
-		"eslint": "^6.8.0",
+		"@typescript-eslint/eslint-plugin": "^3.0.2",
+		"@typescript-eslint/parser": "^3.0.2",
+		"eslint": "^7.1.0",
+		"eslint-config-google": "^0.14.0",
 		"faker": "^4.1.0",
 		"glob": "^7.1.6",
 		"mocha": "^7.1.2",
@@ -81,6 +105,6 @@
 		"vscode-test": "^1.3.0"
 	},
 	"dependencies": {
-		"moment": "^2.25.3"
+		"moment": "^2.26.0"
 	}
 }
