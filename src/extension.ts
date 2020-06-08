@@ -2,32 +2,32 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import {CommentedCodeDependencyProvider} from './dependencyProvider';
+import {Utilities} from './utilities';
+import {InMemorySnippetRepository} from
+  './frameworks/persistence/inMemory/inMemorySnippetRepository';
 
 /**
  * @param {vscode.ExtensionContext } context
  */
 export function activate(context: vscode.ExtensionContext) {
-  const commentedCodeDependencyProvider = new CommentedCodeDependencyProvider();
+  const inMemorySnippetRepository = new InMemorySnippetRepository();
+  const commentedCodeDependencyProvider = new CommentedCodeDependencyProvider(
+      inMemorySnippetRepository);
   vscode.window.registerTreeDataProvider('commentedCodeKeeperView',
       commentedCodeDependencyProvider);
   vscode.commands.registerCommand(
       'commentedCodeKeeperView.addEntry',
       async () => {
-        const snippet = commentedCodeDependencyProvider.getSelectedSnippet();
-        const title = await commentedCodeDependencyProvider.getTitle();
-        const description = await commentedCodeDependencyProvider
-            .getDescription();
-        const date = await commentedCodeDependencyProvider.getReminderDate();
+        const utilities = new Utilities();
+        const code = utilities.getSelectedSnippet();
+        const title = await utilities.getTitle();
+        const description = await utilities.getDescription();
+        const date = await utilities.getReminderDate();
 
-        console.info(`Code Snippet: ${snippet}`);
-        console.info(`Title: ${title}`);
-        console.info(`Description: ${description}`);
-        console.info(`Date: ${date}`);
-
-        commentedCodeDependencyProvider.createCodeSnippet(
+        await commentedCodeDependencyProvider.createCodeSnippet(
             title,
             description,
-            snippet,
+            code,
             date,
         );
       },

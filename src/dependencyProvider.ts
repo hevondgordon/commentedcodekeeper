@@ -1,144 +1,102 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as moment from 'moment';
-import * as faker from 'faker';
+import {AddSnippet} from './application/use_cases/addSnippet';
+// eslint-disable-next-line no-unused-vars
+import {SnippetRepository} from
+  './application/contracts/SnippetRepository';
+// eslint-disable-next-line no-unused-vars
+import {Snippet} from './entities/Snippet';
+
 
 export class CommentedCodeDependencyProvider implements
-  vscode.TreeDataProvider<CommentedCodeSnippet> {
-  private _onDidChangeTreeData:
-    vscode.EventEmitter<CommentedCodeSnippet | undefined> =
-    new vscode.EventEmitter<CommentedCodeSnippet | undefined>();
+  vscode.TreeDataProvider<vscode.TreeItem> {
+  // eslint-disable-next-line max-len
+  private _onDidChangeTreeData: vscode.EventEmitter<vscode.TreeItem | undefined> = new vscode.EventEmitter<vscode.TreeItem | undefined>();
+  private snippetRepository: SnippetRepository;
+  readonly onDidChangeTreeData:
+    // eslint-disable-next-line max-len
+    vscode.Event<vscode.TreeItem | undefined> = this._onDidChangeTreeData.event;
 
-  readonly onDidChangeTreeData: vscode.Event<CommentedCodeSnippet | undefined> =
-    this._onDidChangeTreeData.event;
+  constructor(snippetRepository: SnippetRepository) {
+    this.snippetRepository = snippetRepository;
+  }
 
-  constructor() { }
-
-  getTreeItem(element: CommentedCodeSnippet): vscode.TreeItem {
+  getTreeItem(element: CommentedCodeSnippetTreeItem): vscode.TreeItem {
     return element;
   }
 
-  getChildren(element?: CommentedCodeSnippet):
-    Thenable<CommentedCodeSnippet[]> {
+  async getChildren(element?: CommentedCodeSnippetTreeItem):
+    Promise<CommentedCodeSnippetTreeItem[]> {
     if (element) {
-      console.log(element.label);
-      return Promise.resolve(
-          this.getCodeSnippets(),
-      );
+      return Promise.resolve([]);
     } else {
       return Promise.resolve(
-          this.getCodeSnippets(),
+          this.getCodeSnippetTreeItems(),
       );
     }
   }
-  async getTitle(): Promise<string> {
-    let title = await vscode.window.showInputBox({
-      placeHolder: 'Enter the name of the file that the snippet belongs to',
-    });
-    title = title === undefined ? title = '' : title;
-    return title;
-  }
 
-  async getDescription(): Promise<string> {
-    let description = await vscode.window.showInputBox({
-      placeHolder: `Enter a short description for why
-       the snippet is being commented`,
-    });
-    description = description === undefined ? description = '' : description;
-    return description;
-  }
-
-  async getReminderDate(): Promise<Date> {
-    const date = await vscode.window.showInputBox({
-      value: '',
-      placeHolder: `Enter reminder date in format DD/MM/YYYY`,
-      validateInput: (date) => {
-        let validationErr = null;
-        if (!moment(date, 'DD/MM/YYYY', true).isValid()) {
-          validationErr = 'Incorrect date format';
-        }
-        return validationErr;
-      },
-    });
-    return moment(date).toDate();
-  }
-
-  getSelectedSnippet(): string {
-    const editor = vscode.window.activeTextEditor;
-    let selectiontext = '';
-    if (editor) {
-      let selection = editor.selection;
-      const _selection = new vscode.Selection(
-          new vscode.Position(0, 0), new vscode.Position(0, 0));
-      selection = selection === undefined ? selection = _selection: selection;
-      const document = editor.document;
-      selectiontext = document.getText(selection);
-    }
-    return selectiontext;
-  }
-
-  createCodeSnippet( title: string,
+  async createCodeSnippet( title: string,
       description: string,
-      snippet: string,
-      reminderDate: Date):CommentedCodeSnippet {
-    const commentedCodeSnippet = new CommentedCodeSnippet(
-        title,
-        description,
+      code: string,
+      reminderDate: Date):Promise<CommentedCodeSnippetTreeItem> {
+    const addSnippetCommand = new AddSnippet(this.snippetRepository);
+    const snippet = await addSnippetCommand.execute(
+        title, description, code, reminderDate,
+    );
+    const commentedCodeSnippetTreeItem = new CommentedCodeSnippetTreeItem(
         snippet,
-        reminderDate,
         vscode.TreeItemCollapsibleState.Collapsed,
     );
 
-    commentedCodeSnippet.save();
-    return commentedCodeSnippet;
+    commentedCodeSnippetTreeItem.save();
+    this._onDidChangeTreeData.fire(commentedCodeSnippetTreeItem);
+    return commentedCodeSnippetTreeItem;
   }
 
 
-  private getCodeSnippets(): CommentedCodeSnippet[] {
-    const snippet1 = new CommentedCodeSnippet(
-        faker.lorem.sentence(),
-        faker.lorem.sentences(),
-        faker.random.words(),
-        new Date(),
-        vscode.TreeItemCollapsibleState.Collapsed,
+  private async getCodeSnippetTreeItems():
+  Promise<CommentedCodeSnippetTreeItem[]> {
+    const snippets = await this.snippetRepository.getAll();
+    const codeSnippetTreeItems = snippets.map(
+        (snippet) => new CommentedCodeSnippetTreeItem(
+            snippet,
+            vscode.TreeItemCollapsibleState.Collapsed,
+        ),
     );
-    const snippet2 = new CommentedCodeSnippet(
-        faker.lorem.sentence(),
-        faker.lorem.sentences(),
-        faker.random.words(),
-        new Date(),
-        vscode.TreeItemCollapsibleState.Collapsed,
-    );
-    return [snippet1, snippet2];
+    return new Promise((resolve, _reject) => {
+      resolve(codeSnippetTreeItems);
+    });
   }
 }
 
-class CommentedCodeSnippet extends vscode.TreeItem {
+class CommentedCodeSnippetTreeItem extends vscode.TreeItem {
+  snippet: Snippet
   constructor(
-    private title: string,
-    private _description: string,
-    private snippet: string,
-    private reminderDate: Date,
-    public collapsibleState: vscode.TreeItemCollapsibleState,
+      snippet: Snippet,
+      public collapsibleState: vscode.TreeItemCollapsibleState,
   ) {
-    super(title, collapsibleState);
+    super(snippet.title, collapsibleState);
+    this.snippet = snippet;
   }
 
   get tooltip(): string {
-    return `${this.title} - 
-    ${moment(this.reminderDate).format('MMMM Do YYYY, h:mm:ss a')}`;
+    return `${this.snippet.title} - 
+    ${moment(this.snippet.reminderDate).format('MMMM Do YYYY, h:mm:ss a')}`;
   }
 
   get description(): string {
-    return this._description;
+    return this.snippet.description;
   }
 
   private updateSnippetWithMetaData() {
     const updatedSnippet = `
-        /*
-        ** Description: ${this.description}
-        I would like to update this by ${moment(this.reminderDate).format('MMMM Do YYYY')}
-        */
+      /*
+      ** Description: ${this.description}
+      I would like to update this by ${moment(this.snippet.reminderDate)
+      .format('MMMM Do YYYY')}
+      */
 
         ${this.snippet}
       `;
@@ -148,7 +106,7 @@ class CommentedCodeSnippet extends vscode.TreeItem {
   save() {
     const edit = new vscode.WorkspaceEdit();
     const txtUri = vscode.Uri.file(
-        path.join(__filename, '..', '..', 'snippets', `${this.title}`),
+        path.join(__filename, '..', '..', 'snippets', `${this.snippet.title}`),
     );
     edit.createFile(
         txtUri,
