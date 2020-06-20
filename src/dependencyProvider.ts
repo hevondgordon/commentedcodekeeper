@@ -12,7 +12,9 @@ import {Snippet} from './entities/Snippet';
 export class CommentedCodeDependencyProvider implements
   vscode.TreeDataProvider<vscode.TreeItem> {
   // eslint-disable-next-line max-len
-  private _onDidChangeTreeData: vscode.EventEmitter<vscode.TreeItem | undefined> = new vscode.EventEmitter<vscode.TreeItem | undefined>();
+  private _onDidChangeTreeData:
+    vscode.EventEmitter<vscode.TreeItem | undefined> =
+      new vscode.EventEmitter<vscode.TreeItem | undefined>();
   private snippetRepository: SnippetRepository;
   readonly onDidChangeTreeData:
     // eslint-disable-next-line max-len
