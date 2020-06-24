@@ -1,13 +1,19 @@
+
+// eslint-disable-next-line no-unused-vars
+import {SnippetInput} from './snippetInput';
+/**
+ * Snippet entity
+ */
 export class Snippet {
   title: string;
   description: string;
   code: string;
   reminderDate: Date;
-  constructor(title: string, description: string, code: string,
-      reminderDate: Date) {
-    this.title = title;
-    this.description = description;
-    this.code = code;
-    this.reminderDate = reminderDate;
+  // eslint-disable-next-line require-jsdoc
+  constructor(snippetInput: SnippetInput) {
+    this.title = snippetInput.title;
+    this.description = snippetInput.description;
+    this.code = snippetInput.code;
+    this.reminderDate = snippetInput.reminderDate;
   }
 };

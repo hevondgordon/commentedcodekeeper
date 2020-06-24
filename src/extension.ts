@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 import {CommentedCodeDependencyProvider} from './dependencyProvider';
 import {Utilities} from './utilities';
 import {InMemorySnippetRepository} from
-  './frameworks/persistence/inMemory/inMemorySnippetRepository';
+  './frameworks/inMemorySnippetRepository';
 
 /**
  * @param {vscode.ExtensionContext } context

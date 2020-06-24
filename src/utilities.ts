@@ -1,6 +1,13 @@
 import * as vscode from 'vscode';
 import * as moment from 'moment';
+/**
+ * Helper utilities.
+ */
 export class Utilities {
+  /**
+   * get snippet title from input box.
+   * @return {Promise<String>}
+   */
   async getTitle(): Promise<string> {
     let title = await vscode.window.showInputBox({
       placeHolder: 'Enter the name of the file that the snippet belongs to',
@@ -8,7 +15,10 @@ export class Utilities {
     title = title === undefined ? title = '' : title;
     return title;
   }
-
+  /**
+   * get snippet description from input box.
+   * @return {Promise<String>}
+   */
   async getDescription(): Promise<string> {
     let description = await vscode.window.showInputBox({
       placeHolder: `Enter a short description for why
@@ -17,7 +27,10 @@ export class Utilities {
     description = description === undefined ? description = '' : description;
     return description;
   }
-
+  /**
+   * get reminder date from input box.
+   * @return {Promise<String>}
+   */
   async getReminderDate(): Promise<Date> {
     const date = await vscode.window.showInputBox({
       value: '',
@@ -32,7 +45,10 @@ export class Utilities {
     });
     return moment(date, 'DD/MM/YYYY').toDate();
   }
-
+  /**
+   * get selected snippet from vsode editor.
+   * @return {String}
+   */
   getSelectedSnippet(): string {
     const editor = vscode.window.activeTextEditor;
     let selectiontext = '';

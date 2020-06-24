@@ -1,3 +1,4 @@
+/* eslint-disable require-jsdoc */
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as moment from 'moment';
@@ -11,13 +12,12 @@ import {Snippet} from './entities/Snippet';
 
 export class CommentedCodeDependencyProvider implements
   vscode.TreeDataProvider<vscode.TreeItem> {
-  // eslint-disable-next-line max-len
   private _onDidChangeTreeData:
     vscode.EventEmitter<vscode.TreeItem | undefined> =
       new vscode.EventEmitter<vscode.TreeItem | undefined>();
   private snippetRepository: SnippetRepository;
   readonly onDidChangeTreeData:
-    // eslint-disable-next-line max-len
+    // eslint-disable-next-line no-invalid-this
     vscode.Event<vscode.TreeItem | undefined> = this._onDidChangeTreeData.event;
 
   constructor(snippetRepository: SnippetRepository) {
@@ -44,7 +44,7 @@ export class CommentedCodeDependencyProvider implements
       code: string,
       reminderDate: Date):Promise<CommentedCodeSnippetTreeItem> {
     const addSnippetCommand = new AddSnippet(this.snippetRepository);
-    const snippet = await addSnippetCommand.execute(
+    const snippet: Snippet = await addSnippetCommand.execute(
         title, description, code, reminderDate,
     );
     const commentedCodeSnippetTreeItem = new CommentedCodeSnippetTreeItem(
@@ -53,7 +53,7 @@ export class CommentedCodeDependencyProvider implements
     );
 
     commentedCodeSnippetTreeItem.save();
-    this._onDidChangeTreeData.fire(commentedCodeSnippetTreeItem);
+    this._onDidChangeTreeData.fire(undefined);
     return commentedCodeSnippetTreeItem;
   }
 
