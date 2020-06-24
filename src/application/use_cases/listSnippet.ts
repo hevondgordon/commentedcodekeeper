@@ -20,9 +20,7 @@ export class ListSnippet {
      * @return {Promise<Snippet[]>}
      */
     async execute(): Promise<Snippet[]> {
-      const snippets = this.SnippetRepository.getAll();
-      return new Promise((resolve, _reject) => {
-        resolve(snippets);
-      });
+      const snippets = await this.SnippetRepository.getAll();
+      return Promise.resolve(snippets);
     }
 }

@@ -6,16 +6,18 @@ import {Snippet} from '../entities/Snippet';
 // eslint-disable-next-line no-unused-vars
 import {SnippetInput} from '../entities/snippetInput';
 import {SnippetSerializer} from '../entities/snippetSerializer';
-import {InMemoryDatabaseService} from './inMemoryDatabaseService';
+import {DatabaseServiceImplementation} from './DatabaseService.impl';
 // eslint-disable-next-line no-unused-vars
 import axios, {AxiosInstance} from 'axios';
 import * as moment from 'moment';
+import { resolve } from 'path';
+import { rejects } from 'assert';
 
 /**
  * Snippet repository implementation
  */
-export class InMemorySnippetRepository extends SnippetRepository {
-  InMemoryDatabaseService: InMemoryDatabaseService
+export class SnippetRepositoryImplementation extends SnippetRepository {
+  DatabaseServiceImplementation: DatabaseServiceImplementation
   snippets: Snippet[];
   api: AxiosInstance
   // eslint-disable-next-line require-jsdoc
@@ -29,7 +31,7 @@ export class InMemorySnippetRepository extends SnippetRepository {
         'Content-Type': 'application/json',
       },
     });
-    this.InMemoryDatabaseService = new InMemoryDatabaseService();
+    this.DatabaseServiceImplementation = new DatabaseServiceImplementation();
     const snippetInput: SnippetInput = {
       title: 'res.data.title',
       code: 'res.data.code',
@@ -54,22 +56,20 @@ export class InMemorySnippetRepository extends SnippetRepository {
         snippetData.reminderDate = moment(snippet.reminderDate).format(
             'YYYY-MM-DD');
         this.api.post('snippets/', snippetData)
-            .then((response) => {
-              console.log(response);
-              resolve(
-                  new Snippet(
-                      {
-                        title: response.data.title, code: response.data.code,
-                        reminderDate: response.data.reminderDate,
-                        description: response.data.description,
-                      },
-                  ),
-              );
-            })
-            .catch((error) => {
-              console.log(error.response);
-              reject(error.response.data);
-            });
+          .then((response) => {
+            console.log(response.data)
+            const snippetInput: SnippetInput = {
+              title: response.data.title,
+              code: response.data.code,
+              reminderDate: response.data.reminderDate,
+              description: response.data.description,
+            };
+            resolve(new Snippet(snippetInput));
+          })
+          .catch((error) => {
+            console.log(error.response);
+            reject(error.response.data);
+          });
       }
     });
   }
@@ -79,8 +79,26 @@ export class InMemorySnippetRepository extends SnippetRepository {
    * @return {Promise<Snippet[]>}
    */
   async getAll(): Promise<Snippet[]> {
-    return new Promise((resolve, _reject) => {
-      resolve(this.snippets);
-    });
+    const snippetInputs: SnippetInput[] = [];
+    return new Promise((resolve, reject) => {
+      this.api.get('snippets/').then((response) => {
+        console.log(response.data.results)
+        for (const snippetInput of response.data.results) {
+          const _snippetInput: SnippetInput = {
+            title: snippetInput.title,
+            code: snippetInput.code,
+            reminderDate: snippetInput.reminderDate,
+            description: snippetInput.description,
+          }
+          snippetInputs.push(_snippetInput);
+        }
+        const snippets =  this.inflateSnippets(snippetInputs);
+        resolve(snippets);
+      }).catch((error) => {
+        console.log(error.response);
+        reject(error)
+      })
+    })
+    
   }
 }

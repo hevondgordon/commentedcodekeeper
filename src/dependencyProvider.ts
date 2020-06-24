@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as moment from 'moment';
 import {AddSnippet} from './application/use_cases/addSnippet';
+import {ListSnippet} from './application/use_cases/listSnippet';
 // eslint-disable-next-line no-unused-vars
 import {SnippetRepository} from
   './application/contracts/SnippetRepository';
@@ -47,9 +48,12 @@ export class CommentedCodeDependencyProvider implements
     const snippet: Snippet = await addSnippetCommand.execute(
         title, description, code, reminderDate,
     );
+    const listSnippetsCommand = new ListSnippet(this.snippetRepository);
+    const snippets = await listSnippetsCommand.execute();
+    console.log(`the amount of snippets number up to ${snippets.length}`)
     const commentedCodeSnippetTreeItem = new CommentedCodeSnippetTreeItem(
         snippet,
-        vscode.TreeItemCollapsibleState.Collapsed,
+        vscode.TreeItemCollapsibleState.None,
     );
 
     commentedCodeSnippetTreeItem.save();
@@ -64,7 +68,7 @@ export class CommentedCodeDependencyProvider implements
     const codeSnippetTreeItems = snippets.map(
         (snippet) => new CommentedCodeSnippetTreeItem(
             snippet,
-            vscode.TreeItemCollapsibleState.Collapsed,
+            vscode.TreeItemCollapsibleState.None,
         ),
     );
     return new Promise((resolve, _reject) => {

@@ -3,16 +3,17 @@
 import * as vscode from 'vscode';
 import {CommentedCodeDependencyProvider} from './dependencyProvider';
 import {Utilities} from './utilities';
-import {InMemorySnippetRepository} from
-  './frameworks/inMemorySnippetRepository';
+import {SnippetRepositoryImplementation} from
+  './frameworks/SnippetRepository.impl';
 
 /**
  * @param {vscode.ExtensionContext } context
+ * @return {void}
  */
-export function activate(context: vscode.ExtensionContext) {
-  const inMemorySnippetRepository = new InMemorySnippetRepository();
+export function activate(context: vscode.ExtensionContext):void {
+  const snippetRepositoryImplementation = new SnippetRepositoryImplementation();
   const commentedCodeDependencyProvider = new CommentedCodeDependencyProvider(
-      inMemorySnippetRepository);
+    snippetRepositoryImplementation);
   vscode.window.registerTreeDataProvider('commentedCodeKeeperView',
       commentedCodeDependencyProvider);
   vscode.commands.registerCommand(
@@ -60,4 +61,6 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 /** this method is called when your extension is deactivated */
-export function deactivate() {}
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+export function deactivate():void {}
