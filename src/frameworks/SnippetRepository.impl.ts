@@ -10,8 +10,8 @@ import {DatabaseServiceImplementation} from './DatabaseService.impl';
 // eslint-disable-next-line no-unused-vars
 import axios, {AxiosInstance} from 'axios';
 import * as moment from 'moment';
-import { resolve } from 'path';
-import { rejects } from 'assert';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 /**
  * Snippet repository implementation
@@ -27,7 +27,7 @@ export class SnippetRepositoryImplementation extends SnippetRepository {
       baseURL: 'http://0.0.0.0:8000/api/',
       timeout: 1000,
       headers: {
-        'Authorization': 'Token 9dd472ab5bb23ce634c95330aed258f2f555dbac',
+        'Authorization': `Token ${process.env.TOKEN}`,
         'Content-Type': 'application/json',
       },
     });
